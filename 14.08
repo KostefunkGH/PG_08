@@ -1,0 +1,214 @@
+# coding: utf8
+boom=0
+win=0
+import pygame
+import random
+high = random.randint(250, 300)
+def load_menu():
+    items = [(160, 140, 'Play now!!!', (0, 0, 0),(255, 0, 0), 0), (160, 340, 'Quit', (0, 0, 0),(255, 0, 0), 0)] # создать вторую кнопку]
+    pygame.mouse.set_visible(True)
+ 
+    done = False
+    item = 0
+    while not done:
+        # закрасить фон полностью (screen и score)
+        screen.fill([0,0,200])
+        score.fill([0,0,0])
+        for e in pygame.event.get():
+                if e.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+ 
+                if e.type == pygame.MOUSEBUTTONDOWN and e.button == 1:
+                    if item == 0:
+                        done = True
+                    elif item == 1:
+                        pygame.quit()
+                        sys.exit()
+ 
+        pointer = pygame.mouse.get_pos()
+        for i in items:
+            if pointer[0]>i[0] and pointer[0]<i[0]+155 and pointer[1]>i[1] and pointer[1]<i[1]+50:
+                item = i[5]
+ 
+        for i in items:
+            if item == i[5]:
+                screen.blit(myFont.render(i[2], 1, i[4]), [i[0], i[1]-40])
+            else:
+                screen.blit(myFont.render(i[2], 1, i[3]), [i[0], i[1]-40])
+ 
+        window.blit(screen, [0, 40])
+        window.blit(score, [0, 0])
+        pygame.display.flip()
+pygame.font.init()
+myFont=pygame.font.Font('Budbn.ttf',40)
+# задаем размер окна, создаем окно размера size
+size = [400, 460]
+window = pygame.display.set_mode(size)
+# задаем имя - в кавычках, т.к. текст - это строка
+pygame.display.set_caption('My second file')
+ 
+screen = pygame.Surface([400,400])
+score = pygame.Surface([400,60])
+
+class Sprite:
+    def __init__(self, xpos, ypos, filename):
+        self.x = xpos
+        self.y = ypos
+        self.bitmap = pygame.image.load(filename)
+    def render(self):
+        screen.blit(self.bitmap,(self.x, self.y))
+def Intersect(s1_x, s2_x, s1_y, s2_y):
+    if ((s1_x>s2_x-40) and (s1_x<s2_x+40) and (s1_y>s2_y-40) and (s1_y<s2_y+40)):
+        return 1
+    else:
+        return 0
+    boom=1
+# создание персонажей
+# герой
+'''x=int(input('Введите положение по x: '))
+y=int(input('Введите положение по y: '))'''
+hero = Sprite(0, 240, 'hero.png')
+# переменные-"переключатели" движения для героя
+hero.right = True
+hero.up = True
+# враг
+enemy = Sprite(360, 240, 'enemy.png')
+arrow = Sprite(-100,-100,'fireball.png')
+arrow1 = Sprite(-100,-100,'fireball.png')
+arrow2 = Sprite(-100,-100,'fireball.png')
+arrow3 = Sprite(-100,-100,'fireball.png')
+win1 = Sprite(-200, 100, 'win1.png')
+phone = Sprite(0, 280, 'phone.jpg')
+# переменные-"переключатели" движения для врага
+enemy.right = True
+enemy.up = False
+arrow.up = True
+arrow1.up = False
+arrow2.up = False
+arrow3.up = False
+running = True
+pygame.key.set_repeat(1,1)
+load_menu()
+while running:
+    # обработка событий
+    for e in pygame.event.get():
+        if e.type == pygame.QUIT:
+            running  = False
+        if e.type == pygame.KEYDOWN:
+            if e.key == pygame.K_UP:
+                hero.right=False
+            elif e.key == pygame.K_DOWN:
+                hero.right=True
+            elif e.key == pygame.K_LEFT:
+                hero.x-=0.25
+            elif e.key == pygame.K_RIGHT:
+                hero.x+=0.25
+            elif e.key == pygame.K_SPACE:
+                arrow.y=hero.y-20
+                arrow.x=hero.x+10
+                arrow1.y=enemy.y
+                arrow1.x=enemy.x+10
+                arrow2.y=enemy.y
+                arrow2.x=enemy.x+10
+                arrow3.y=enemy.y
+                arrow3.x=enemy.x+10
+                arrow.up=True
+                arrow1.up=True
+                arrow2.up=True
+                arrow3.up=True
+    if arrow.up == True:
+        arrow.x+=15
+        if arrow.x > 410:
+            arrow.up = False
+    if arrow1.up == True:
+        arrow1.x-=7
+    if arrow2.up == True:
+        arrow2.x-=11
+        arrow2.y-=4
+    if arrow3.up == True:
+        arrow3.x-=15
+        arrow3.y-=7
+    if hero.right==False:
+        hero.y-=5
+        if hero.y < 100:
+            hero.right=True
+    if hero.right==True:
+        hero.y+=10
+    text=myFont.render('score:',1,[0,0,0])
+    # задайте фоновый цвет
+    screen.fill([0,0,0])
+    if (boom==0):
+        screen.fill([0,0,220])
+    else:
+        screen.fill([255,0,0])
+    score.fill([0,0,0])
+    # движение персонажей - аналогично тому,
+    # что делали с квадратом, но теперь по вертикали
+    if hero.y > 240:                        
+        hero.y=240
+    elif hero.x > 360:                        
+        hero.x-=1
+    elif hero.x < 0:                        
+        hero.x+=1
+    if enemy.right == True:
+        enemy.x -= 5
+        if enemy.x < high:
+            enemy.right = False
+    else:
+        enemy.x += 5
+        if enemy.x > 360:
+            enemy.right = True
+            high = random.randint(0, 400)
+    #enemy.x = random.randint(0, 400)
+    #enemy.y = random.randint(0, 400)
+ 
+ 
+    # столкновение персонажей
+    if Intersect(hero.x, enemy.x, hero.y, enemy.y):
+        hero.up = False
+        enemy.up = True
+        boom=1
+    if Intersect(arrow.x, enemy.x, arrow.y, enemy.y):
+        arrow.x=-100
+        arrow.y=-100
+        arrow.up=False
+        screen.fill([255,0,0])
+        win = win + 1
+    if Intersect(arrow1.x, hero.x, arrow1.y, hero.y):
+        hero.x=-100
+        hero.y=-100
+        boom=1
+    elif Intersect(arrow2.x, hero.x, arrow2.y, hero.y):
+        hero.x=-100
+        hero.y=-100
+        boom=1
+    elif Intersect(arrow3.x, hero.x, arrow3.y, hero.y):
+        hero.x=-100
+        hero.y=-100
+        boom=1
+    if win==10:
+        win1.x=150
+        enemy.y=-100
+    # отображение персонажей
+    win1.render()
+    phone.render()
+    arrow.render()
+    arrow1.render()
+    arrow2.render()
+    arrow3.render()
+    if (boom==0):
+        hero.render()
+        enemy.render()
+    else:
+        enemy.y=hero.y
+        enemy.x=hero.x
+    # отображение окна
+    score.blit(text,[10,10])
+    window.blit(screen, [0, 60])
+    window.blit(score,[0, 0])
+    pygame.display.flip()
+    pygame.time.delay(50)
+ 
+ 
+pygame.quit()
